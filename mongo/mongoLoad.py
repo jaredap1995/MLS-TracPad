@@ -1,4 +1,4 @@
-from mongoPreprocessing import MongoPreprocessing
+from mongo.mongoPreprocessing import MongoPreprocessing
 from pymongo import MongoClient
 
 class MongoLoad:

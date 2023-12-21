@@ -1,5 +1,5 @@
 import gc
-from extractAPIdata import ExtractAPIData
+from api.extractAPIdata import ExtractAPIData
 
 match_ids = 'get from physical_data'
 games = list(game for game in match_ids)
