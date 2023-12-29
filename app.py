@@ -7,7 +7,7 @@ def load_config():
         return json.load(file)
     
 def extract_data(config):
-    extractor = DataProcessor(config['GameID'], config['client'], config['db'], config['collection'], config['authorization_token'], config['VendorID'], config['ExtractionVersion'], config['dataQuality'], config['meta_endpoint'], config['tac_endpoint'])
+    extractor = DataProcessor(config['GameID'], config['client'], config['db'], config['collection'], config['authorization_token'], config['VendorID'], config['ExtractionVersion'], config['DataQuality'], config['meta_endpoint'], config['tac_endpoint'])
 
     print(f'The Data Extractor is ready with the following parameters: {config}\n')
 
@@ -72,7 +72,7 @@ def main():
     while True:
         config = load_config()
         if config:
-            print(f"Your configuration file was properly read. Your current team of interest is: {config['team']}\n")
+            print(f"Your configuration file was properly read. Your gameID(s) of interest are: {config['GameID']}\n")
             print("If this is correct, then the values were properly loaded.")
 
         action = input("What action would you like to do today? Type 'Extract', 'Process' or 'Exit' to end the program: ").lower()

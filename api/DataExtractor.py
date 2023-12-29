@@ -1,4 +1,5 @@
 import gc
+import json
 from api.extractAPIdata import ExtractAPIData
 
 
@@ -17,8 +18,13 @@ class DataProcessor:
         self.tac_endpoint = tac_endpoint
 
     def save_data_to_file(self, data, filename):
-        with open(f"{filename}.txt", "w") as file:
-            file.write(data)
+        
+        if isinstance(data, dict):
+            with open(f"{filename}.json", "w") as file:
+                json.dump(data, file)
+        else:
+            with open(f"{filename}.txt", "w") as file:
+                file.write(data)
 
     def process_game_data(self, choice):
         # Confirm the user's intent to process data

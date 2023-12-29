@@ -1,5 +1,4 @@
 {
-    "team": "select a team from the teamnames in the provided teamnames.csv file", 
     "GameID": "game_id...can also be an array of values",
     "VendorID": "provided_vendor_id",
     "ExtractionVersion": "extraction_version",
