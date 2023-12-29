@@ -3,75 +3,44 @@ import requests
 import json
 
 class ExtractAPIData:
-    def __init__(self, GameID) -> None:
-        """
-        Parameters:
-        GameID (str): The unique identifier of the game.
-        """
-
+    def __init__(self, GameID, client, db, collection, header, vendorID, ExtractionVersion, dataQuality, meta_endpoint, tac_endpoint):
         self.game_id = GameID
-        self.client = MongoClient('mongodb://client_url')
-        self.db = self.client['db_name']
+        self.client = MongoClient(client)
+        self.db = self.client[db]
+        self.collection = self.db[collection]
 
-
-        self.meta_endpoint = "provided tracab api metadat endpoint ('physical data')"
-        self.tac_endpoint = "provided tracab tactical api endpoint"
-
+        self.meta_endpoint = meta_endpoint
+        self.tac_endpoint = tac_endpoint
 
         self.params = {
             "GameID": self.game_id,
-            "VendorID": "your ID",
-            "ExtractionVersion": "your ID",
-            "DataQuality": "1" # 0 or raw depending on raw or finally processed format
+            "VendorID": vendorID,
+            "ExtractionVersion": ExtractionVersion,
+            "DataQuality": dataQuality
         }
 
         self.headers = {
-            "Provided authorization token"
-    }
+            "Authorization": header
+        }
 
     def fetch_tactical_data(self):
-        """
-        Fetches tactical data for a given game. 
-
-        I usually returned the data and saved it as a txt file and then processed it using the TracPad class object,
-        though this approach can be modified depending on use case and need.
-
-        Returns:
-        dict: The tactical data retrieved from the API.
-        """
-
-
         response = requests.get(self.tac_endpoint, params=self.params, headers=self.headers)
         response.raise_for_status()
 
         if response.status_code == 200:
             print('Successful 200 Response. Attempting to retrieve data. This may take a while.')
             print(response.text[:500])
-            data = response.text
-            return data
+            return response.text
         else:
             print("There appears to be an error. The response was ", response)
 
-
-    def insert_metadata(self):
-        """
-        Inserts metadata into MongoDB for a given game.
-        """
-
+    def fetch_metadata(self):
         response = requests.get(self.meta_endpoint, params=self.params, headers=self.headers)
         response.raise_for_status()
 
-        
-        collection = self.db['collections_name']
-
         if response.status_code == 200:
             print('Successful 200 Response. Attempting to retrieve data. This may take a while.')
-            data = json.loads(response.text)
-            data['_id'] = data.pop('GameID')
-            try:
-                collection.insert_one(data)
-                print('Successfully uploaded data into Mongo')
-            except Exception as e:
-                print('Error', e)
+            return json.loads(response.text)
         else:
             print("There appears to be an error. The response was ", response)
+            return None

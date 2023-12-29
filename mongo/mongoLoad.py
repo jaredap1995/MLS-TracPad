@@ -2,11 +2,14 @@ from mongo.mongoPreprocessing import MongoPreprocessing
 from pymongo import MongoClient
 
 class MongoLoad:
-    def __init__(self, match_data, tracpad):
+    def __init__(self, match_data, tracpad, client, db, team, collection):
 
         #Extract the match_data
-        self.client = MongoClient('mongodb://your_host_path')
-        self.db = self.client['your_db_name']
+        self.client = MongoClient(client)
+        self.db = self.client[db]
+        self.collection = collection
+
+        # This data is grabbed from the metadata API endpoint
         self.physical = match_data #needs to be JSON Object that is provided by MLS API
 
         ## TracPad Object ###
@@ -16,8 +19,7 @@ class MongoLoad:
         self.teams = [self.physical['AwayTeam']['LongName'].lower(),self.physical['HomeTeam']['LongName'].lower()]
 
         ########################################################################
-        ### Must Replace with name of team interested in examining #####
-        self.team = "team_of_interest".lower()
+        self.team = team.lower()
         ########################################################################
 
         if self.team in self.teams:
@@ -25,8 +27,8 @@ class MongoLoad:
             self.side = 'away' if idx == 0 else 'home'
             self.team_physical = self.tp.away_team_physical if idx == 0 else self.tp.home_team_physical
 
-    def ball_load(self):
-        collection = self.db['collection_name'] #Typically used "TracPad or TracPad_Ball etc."
+    def tactical_ball_load(self):
+        collection = self.collection #Typically used "TracPad or TracPad_Ball etc."
         ball_data = self.tp.get_ball_data()
 
 
@@ -59,3 +61,18 @@ class MongoLoad:
             except Exception as e:
                 print('failed to upload: ', preprocessed_player_data, e)
                 break
+
+    def insert_metadata(self):
+        data = self.physical
+        if data is not None:
+            action = input('Would you like to upload this data into Mongo? Type "Yes" or "No"').lower()
+
+            if action == 'yes':
+                try:
+                    data['_id'] = data.pop('GameID')
+                    self.collection.insert_one(data)
+                    print('Successfully uploaded data into Mongo')
+                except Exception as e:
+                    print('Error', e)
+            else:
+                print('Data was not uploaded into Mongo')

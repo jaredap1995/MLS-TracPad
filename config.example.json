@@ -1,0 +1,18 @@
+{
+    "team": "select a team from the teamnames in the provided teamnames.csv file", 
+    "GameID": "game_id...can also be an array of values",
+    "VendorID": "provided_vendor_id",
+    "ExtractionVersion": "extraction_version",
+    "DataQuality": "1",
+
+
+    "tac_endpont": "your_tactical_endpoint",
+    "meta_endpoint": "provided tracab api metadat endpoint ('physical data')",
+    "authorization_token": "typically in the format...'Bearer token'",
+
+    "client": "Mongo URI if using a MongoDB database",
+    "db": "database_name if using MongoDB",
+    "collection": "colelction_name if using MongoDb"
+
+
+}
