@@ -1,5 +1,6 @@
 from api.DataExtractor import DataProcessor
 from tracPad import TracPad
+from mongo.mongoLoad import MongoLoad
 import json
 
 def load_config():
@@ -21,9 +22,14 @@ def extract_data(config):
         extractor.process_game_data('both')
 
 def transform_data():
+
+    ##### Need to clean up this function for returning the dataframe data and turning it into CSV ######
+
     tactical_path = input('In order to process the data, please copy the filepath to the raw tactical data: ')
     physical_path = input('Now, please provide the filepath to the corresponding metadata for that game: ')
     tp = TracPad(tactical_data_path=tactical_path, physical_data_path=physical_path)
+
+    ## Home team is always first in the list
     teams = (tp.physical_data['HomeTeam']['LongName'].lower(), tp.physical_data['AwayTeam']['LongName'].lower())
     side = input(f'Please enter the team you would like to analyze. The options are {teams[0]} or {teams[1]}: ').lower()
 
@@ -64,7 +70,10 @@ def transform_data():
 
 
 def load_data(config):
-    # Will use MongoLoad stuff...TBD
+    next_ = input(f'The currently configured database and collection are: {config["db"]}.{config["collection"]}. Press y if correct [y]/n: ')
+    if next_ == 'y':
+        ##### Next Steps is figure out parameter passing and document then finish up function ####
+        load_object = MongoLoad(config['client'], config['db'], config['collection'])
     pass
 
 
@@ -89,11 +98,13 @@ def main():
             else:
                 print("Invalid input. Please enter 'y' or 'n'.")
                 continue  # invalid input check
+        elif action == 'load':
+            load_data(config)
         elif action == 'exit':
             print("Exiting program.")
             break  # exit option
         else:
-            print("Invalid action. Please type 'Extract', 'Process', or 'Exit'.")
+            print("Invalid action. Please type 'Extract', 'Process', 'Load', or 'Exit'.")
             continue  # Restarts the loop for any other invalid inputs
 
 if __name__ == "__main__":

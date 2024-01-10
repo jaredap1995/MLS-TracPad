@@ -2,7 +2,7 @@ from mongo.mongoPreprocessing import MongoPreprocessing
 from pymongo import MongoClient
 
 class MongoLoad:
-    def __init__(self, match_data, tracpad, client, db, team, collection):
+    def __init__(self, client, db, collection, match_data, tracpad, team):
 
         #Extract the match_data
         self.client = MongoClient(client)
