@@ -155,6 +155,13 @@ def load_data(config):
                     load_object.tactical_ball_load()
                 else:
                     print('Loading cancelled.')
+            elif choice == '3':
+                print('Loading Metadata. \n We are loading the metadata for game ', config['GameID'][0], ' for team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
+                confirm = input('Please confirm that this is correct. Press y if correct [y]/n: ')
+                if confirm == 'y' or not confirm:
+                    load_object.insert_metadata()
+                else:
+                    print('Loading cancelled.')
 
 
 

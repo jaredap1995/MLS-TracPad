@@ -19,14 +19,20 @@ class MongoLoad:
         self.teams = [self.physical['AwayTeam']['LongName'].lower(),self.physical['HomeTeam']['LongName'].lower()]
 
         ########################################################################
-        input_team = input(f'Please enter the team you would like to analyze. The options are \n \n Away Team: {self.teams[0]} \n or \n Home Team: {self.teams[1]} \n \n ')
-        self.team = input_team.lower()
+        # User Input
+        input_ = input('Are you trying to load tactical data or metadata? (tactical/metadata) \n \n').lower()
+        if input_ == 'tactical':
+            input_team = input(f'Please enter the team you would like to analyze. The options are \n \n Away Team: {self.teams[0]} \n or \n Home Team: {self.teams[1]} \n \n ')
+            self.team = input_team.lower()
+            if self.team in self.teams:
+                idx = self.teams.index(self.team)
+                self.side = 'away' if idx == 0 else 'home'
+                self.team_physical = self.tp.away_team_physical if idx == 0 else self.tp.home_team_physical
+
+        elif input_ == 'metadata':
+            pass
         ########################################################################
 
-        if self.team in self.teams:
-            idx = self.teams.index(self.team)
-            self.side = 'away' if idx == 0 else 'home'
-            self.team_physical = self.tp.away_team_physical if idx == 0 else self.tp.home_team_physical
 
     def tactical_ball_load(self):
 
@@ -71,14 +77,11 @@ class MongoLoad:
     def insert_metadata(self):
         data = self.physical
         if data is not None:
-            action = input('Would you like to upload this data into Mongo? Type "Yes" or "No"').lower()
-
-            if action == 'yes':
-                try:
-                    data['_id'] = data.pop('GameID')
-                    self.collection.insert_one(data)
-                    print('Successfully uploaded data into Mongo')
-                except Exception as e:
-                    print('Error', e)
-            else:
-                print('Data was not uploaded into Mongo')
+            try:
+                data['_id'] = data.pop('GameID')
+                self.db[self.collection].insert_one(data)
+                print('Successfully uploaded data into Mongo')
+            except Exception as e:
+                print('Error', e)
+        else:
+            print('Data was not uploaded into Mongo')
