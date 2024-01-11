@@ -9,9 +9,9 @@ const Home: React.FC = () => {
   const [age, setAge] = useState(0)
   
   return (
-    <div>
-      <div className={styles.name}>
-      My name is {name}
+    <div className={styles.container}>
+      <div className={styles.header}>
+        MLS Tracab GUI
       </div>
     </div>
   )

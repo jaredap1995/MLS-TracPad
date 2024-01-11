@@ -39,7 +39,7 @@ class MongoLoad:
         processed_ball_data = MongoPreprocessing(player_df=None, ball_df=ball_data).process_ball(self.physical)
         db_data = processed_ball_data.to_dict(orient = 'records')
         try:
-            collection.insert_many(db_data)
+            self.db[collection].insert_many(db_data)
             print("Successfully Uploaded Ball Data For GameID", self.physical['GameID'])
         except Exception as e:
             print('Failed to Upload Ball Data for Game ', self.physical['GameID'], e)

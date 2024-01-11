@@ -43,7 +43,7 @@ class MongoPreprocessing:
         """
         if self.ball_df is not None:
             frame_counts = self.ball_df['FrameCount'].tolist()
-            self.ball_df['GameID'] = physical_json['_id']
+            self.ball_df['GameID'] = physical_json['GameID']
             self.ball_df = self.add_datetime_column(
                 self.ball_df, frame_counts, physical_json['Kickoff'], physical_json['FrameRate']
             )

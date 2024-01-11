@@ -144,13 +144,17 @@ def load_data(config):
                 if confirm == 'y' or not confirm:
                     load_object.tactical_player_load()
             elif choice == '2':
-                col_change = input('Would have chosen ball_data, would you like to change your collection to a ball specific collection or continue with ', config['collection'], 'continue = y, change = n. [y]/n')
-                if col_change == 'y':
+                # col_change = input('Would have chosen ball_data, would you like to change your collection to a ball specific collection or continue with ', config['collection'], 'continue = y, change = n. [y]/n')
+                # if col_change == 'y':
                     ### Enter the new ncollection code ###
-                    pass
-                else:
-                    load_object.tactical_ball_load()
+                    # pass
+                # else:
                 print('Loading Ball Data. \n We are loading the ball data for game ', config['GameID'][0], ' on team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
+                confirm = input('Please confirm that this is correct. Press y if correct [y]/n: ')
+                if confirm == 'y' or not confirm:
+                    load_object.tactical_ball_load()
+                else:
+                    print('Loading cancelled.')
 
 
 
