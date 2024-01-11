@@ -46,21 +46,5 @@ pip install -r requirements.txt
 
 This command will install all the necessary Python packages as listed in the requirements.txt file.
 
-Running the Project: 
-- You can run the project in a Jupyter notebook or in the terminal. Here's how to get started:
-
-Jupyter Notebook:
-
-If you haven't already, install Jupyter Notebook:
-```
-pip install notebook
-```
-Launch Jupyter Notebook:
-
-```
-jupyter notebook
-```
-Open the provided .ipynb file in the Jupyter interface and run the cells as needed.
-Terminal:
-
-A new UI will be developed to allow less technical uers extract data with simple GUI commands. Stay tuned...
+Running the Program: 
+- You can run the program in the terminal and follow along with the prompted commands (UI coming soon). Make sure to correctly modify your config.json before running the program:
