@@ -1,4 +1,5 @@
 import gc
+import os
 import json
 from api.extractAPIdata import ExtractAPIData
 
@@ -42,7 +43,8 @@ class DataProcessor:
             if choice in ['meta', 'both']:
                 metadata = exAPI.fetch_metadata()
                 if metadata:
-                    self.save_data_to_file(metadata, f"{gameID}_metadata")
+                    os.makedirs(f"metadata/", exist_ok=True)
+                    self.save_data_to_file(metadata, os.path.join("metadata", f"{gameID}_metadata"))
                     gc.collect()
 
             if choice in ['tac', 'both']:
@@ -50,6 +52,7 @@ class DataProcessor:
                 while not success:
                     data = exAPI.fetch_tactical_data()
                     if data:
-                        self.save_data_to_file(data, gameID)
+                        os.makedirs(f"gamedata/", exist_ok=True)
+                        self.save_data_to_file(data, os.path.join("gamedata", f"{gameID}"))
                         success = True
                         gc.collect()

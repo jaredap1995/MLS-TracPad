@@ -1,16 +1,16 @@
 from mongo.mongoPreprocessing import MongoPreprocessing
-from pymongo import MongoClient
+import json
 
 class MongoLoad:
-    def __init__(self, client, db, collection, match_data, tracpad, team):
-
-        #Extract the match_data
-        self.client = MongoClient(client)
+    def __init__(self, client, db, collection, match_data_path, tracpad):
+        # Extract the match_data
+        self.client = client
         self.db = self.client[db]
         self.collection = collection
 
-        # This data is grabbed from the metadata API endpoint
-        self.physical = match_data #needs to be JSON Object that is provided by MLS API
+        # Read match_data from file
+        with open(match_data_path, 'r') as file:
+            self.physical = json.load(file) # Read match_data as JSON object
 
         ## TracPad Object ###
         self.tp = tracpad
@@ -19,7 +19,8 @@ class MongoLoad:
         self.teams = [self.physical['AwayTeam']['LongName'].lower(),self.physical['HomeTeam']['LongName'].lower()]
 
         ########################################################################
-        self.team = team.lower()
+        input_team = input(f'Please enter the team you would like to analyze. The options are \n \n Away Team: {self.teams[0]} \n or \n Home Team: {self.teams[1]} \n \n ')
+        self.team = input_team.lower()
         ########################################################################
 
         if self.team in self.teams:
@@ -28,6 +29,9 @@ class MongoLoad:
             self.team_physical = self.tp.away_team_physical if idx == 0 else self.tp.home_team_physical
 
     def tactical_ball_load(self):
+
+        """ Let's initialize some checks to see if there is a response within the collection that matches the gameID so we can warn the user that they may be duplicating data"""
+
         collection = self.collection #Typically used "TracPad or TracPad_Ball etc."
         ball_data = self.tp.get_ball_data()
 
@@ -36,14 +40,16 @@ class MongoLoad:
         db_data = processed_ball_data.to_dict(orient = 'records')
         try:
             collection.insert_many(db_data)
-            print("Successfully Uploaded Ball Data For GameID", self.physical['_id'])
+            print("Successfully Uploaded Ball Data For GameID", self.physical['GameID'])
         except Exception as e:
-            print('Failed to Upload Ball Data for Game ', self.physical['_id'], e)
+            print('Failed to Upload Ball Data for Game ', self.physical['GameID'], e)
 
 
 
     def tactical_player_load(self): #Loads every Player who played that game
-        collection = self.db['TracPad']
+        collection = self.collection #Typically used "TracPad or TracPad_Ball etc."
+
+        """ Let's initialize some checks to see if there is a response within the collection that matches the gameID so we can warn the user that they may be duplicating data"""
 
         for playerNo in self.team_physical['JerseyNo'].to_list():
             #Skip players who did not play
@@ -56,10 +62,10 @@ class MongoLoad:
             preprocessed_player_data = MongoPreprocessing(player_df=player_data).process_player(playerNo, self.physical, self.team_physical)
             db_data = preprocessed_player_data.to_dict(orient = 'records')
             try:
-                collection.insert_many(db_data)
-                print("Successfully uploaded Player Data for Player Number ", playerNo, "in Game", self.physical['_id'])
+                self.db[collection].insert_many(db_data)
+                print("Successfully uploaded Player Data for Player Number ", playerNo, "in Game", self.physical['GameID'])
             except Exception as e:
-                print('failed to upload: ', preprocessed_player_data, e)
+                print('failed to upload: ', e)
                 break
 
     def insert_metadata(self):

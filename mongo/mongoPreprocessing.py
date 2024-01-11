@@ -70,7 +70,7 @@ class MongoPreprocessing:
 
             # Assign PlayerID and GameID
             self.player_df['PlayerID'] = float(team_data['PlayerID'][team_data['JerseyNo'] == jersey_no].iloc[0])
-            self.player_df['GameID'] = physical_json['_id']
+            self.player_df['GameID'] = physical_json['GameID']
 
             # Add datetime column
             frame_counts = self.player_df['FrameCount'].tolist()
