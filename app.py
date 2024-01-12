@@ -9,6 +9,21 @@ def load_config():
     with open('./config.json', 'r') as file:
         return json.load(file)
     
+def path_generator(gameIDS):
+        meta_data_paths = []
+        game_data_paths = []
+
+        for game_id in gameIDS:
+            meta_path = os.path.join('metadata', f'{game_id}_metadata.json')
+            game_path = os.path.join('gamedata', f'{game_id}.txt')
+
+            if os.path.exists(meta_path):
+                meta_data_paths.append(meta_path)
+            if os.path.exists(game_path):
+                game_data_paths.append(game_path)
+
+        return meta_data_paths, game_data_paths
+
 def extract_data(config):
     extractor = DataProcessor(config['GameID'], config['client'], config['db'], config['collection'], config['authorization_token'], config['VendorID'], config['ExtractionVersion'], config['DataQuality'], config['meta_endpoint'], config['tac_endpoint'])
 
@@ -20,8 +35,11 @@ def extract_data(config):
         extractor.process_game_data('meta')
     elif choice == 'tac':
         extractor.process_game_data('tac')
-    else:
+    elif not choice:
         extractor.process_game_data('both')
+    else:
+        print('Invalid input. Please enter "meta", "tac", or leave blank for both.')
+        return
 
 def transform_data():
 
@@ -113,17 +131,10 @@ def load_data(config):
     ## We need an input to tell the user the TP object is being loaded and check what the game IDS are, confirm then, and then check that the data exists within the correpsodnign directories
     tp_input = input('The current game IDS of interest are: \n\n' + str(config['GameID']) + '\n\n Please confirm that these are the correct game IDS. If not, please update the config.json file and restart the program. \n\n Press y if correct [y]/n: ')
     if tp_input == 'y' or not tp_input:
-        meta_data_paths = []
-        game_data_paths = []
-
-        for game_id in config['GameID']:
-            meta_path = os.path.join('metadata', f'{game_id}_metadata.json')
-            game_path = os.path.join('gamedata', f'{game_id}.txt')
-
-            if os.path.exists(meta_path):
-                meta_data_paths.append(meta_path)
-            if os.path.exists(game_path):
-                game_data_paths.append(game_path)
+        meta_data_paths, game_data_paths = path_generator(config['GameID'])
+        if not meta_data_paths or not game_data_paths:
+            print('There was an error. Please check that the data exists in the metadata and gamedata directories.')
+            return
 
     # For each game I need to load a TP object, so check if gameID of interest is a single game or multiple games
     # If single game, then load the TP object and then load the data into Mongo
@@ -144,11 +155,7 @@ def load_data(config):
                 if confirm == 'y' or not confirm:
                     load_object.tactical_player_load()
             elif choice == '2':
-                # col_change = input('Would have chosen ball_data, would you like to change your collection to a ball specific collection or continue with ', config['collection'], 'continue = y, change = n. [y]/n')
-                # if col_change == 'y':
-                    ### Enter the new ncollection code ###
-                    # pass
-                # else:
+                ######## Might want to implement some logic for better dtabase changes ######
                 print('Loading Ball Data. \n We are loading the ball data for game ', config['GameID'][0], ' on team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
                 confirm = input('Please confirm that this is correct. Press y if correct [y]/n: ')
                 if confirm == 'y' or not confirm:
@@ -163,6 +170,39 @@ def load_data(config):
                 else:
                     print('Loading cancelled.')
 
+        #### Fill in logic if gameIDS is more than 1 #######
+    else:
+            choice = input("""The MongoLoad Object has been created successfully. Please select the data you would like to load into Mongo. 
+                                The options are: \n\n 1. Player Data \n 2. Ball Data \n 3. Metadata \n\n 
+                                Please enter the number corresponding to your choice. If left blank all 3 will be loaded: """)
+            
+            for i, game_id in enumerate(config['GameID']):
+                tp = TracPad(tactical_data_path=game_data_paths[i], physical_data_path=meta_data_paths[i])
+                load_object = MongoLoad(client, config['db'], config['collection'], match_data_path=meta_data_paths[i], tracpad=tp)
+
+                if load_object:
+                    print(f'Processing game {game_id}')
+
+                    if choice == '1':
+                        print('Loading Player Data, this may take a couple minutes.')
+                        print('We are loading the data for every player who played in game ', config['GameID'][i], ' on team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
+                        load_object.tactical_player_load()
+
+
+                    elif choice == '2':
+                        print('Loading Ball Data. \n We are loading the ball data for game ', config['GameID'][i], ' on team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
+                        load_object.tactical_ball_load()
+
+
+                    elif choice == '3':
+                        print('Loading Metadata. \n We are loading the metadata for game ', config['GameID'][i], ' for team' , load_object.team, ' into the collection ', config['collection'], 'in the database ', config['db'])
+                        load_object.insert_metadata()
+
+                    else:
+                        print('Loading all data types')
+                        load_object.tactical_player_load()
+                        load_object.tactical_ball_load()
+                        load_object.insert_metadata()
 
 
 def main():
